@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import StakeInfo from '../components/StakeInfo';
 import WalletBalance from '../components/WalletBalance'; // Import WalletBalance component
-import AddMemberComponent from '@/components/AddMemberComponent';
 import CheckMembershipComponent from '../components/CheckMembershipComponent';
 
 export default function Home() {
@@ -25,7 +24,7 @@ export default function Home() {
           <div className="h2 text-center">Your address: {userAddress}</div>
           <WalletBalance userAddress={userAddress} /> {/* Display Wallet Balance */}
           <StakeInfo userAddress={userAddress} /> {/* Display Stake Info */}
-          <AddMemberComponent/>
+
           <CheckMembershipComponent/>
         </>
       )}
