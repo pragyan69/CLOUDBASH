@@ -3,15 +3,12 @@ import Web3 from 'web3';
 import cors from 'cors'; // Import cors
 import { exec } from 'child_process';
 const app = express();
-
 // Enable CORS for all origins
 app.use(cors());
 app.use(express.json());
-
 const port = 3001;
 const STAKING_CONTRACT_ADDRESS = "0x2e2A769f20133D402192282d8Baa44545A7BD7e0";
 const web3 = new Web3('https://alfajores-forno.celo-testnet.org');
-
 const STAKING_CONTRACT_ABI = [
     {
       "inputs": [],
@@ -256,13 +253,54 @@ const STAKING_CONTRACT_ABI = [
       "type": "function"
     }
   ];
-  
 
+  const contract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS)
+
+  // functions
+function sendTransaction(methodName, args, fromAddress) {
+    console.log(`Sending transaction: ${methodName} with args: ${args} from: ${fromAddress}`);
+    return Promise.resolve({ methodName, args, from: fromAddress, txHash: 'mockTxHash' });
+}
+
+async function sendTransaction2(methodName, args, fromAddress, privateKey) {
+    // Make sure the contract instance is defined
+    if (!contract || !contract.methods[methodName]) {
+        throw new Error('Contract is not defined or methodName is incorrect.');
+    }
+
+    // Estimate gas price and limit
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasLimit = await contract.methods[methodName](...args).estimateGas({ from: fromAddress });
+
+    // Transaction object
+    const txObject = {
+        from: fromAddress,
+        to: contract.options.address, // Make sure contract.options and contract.options.address are available
+        data: contract.methods[methodName](...args).encodeABI(),
+        gas: gasLimit,
+        gasPrice: gasPrice
+    };
+    // debugging
+    console.log('Transaction object:', txObject);
+    if (!privateKey) {
+        throw new Error('Private key is undefined or not provided.');
+    }
+    console.log('Private Key:', privateKey); 
+
+
+    // Sign the transaction with the provided private key
+    const signedTx = await web3.eth.accounts.signTransaction(txObject, privateKey);
+
+    // Send the signed transaction
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    return receipt;
+}
+
+// logging out the importat data 
 console.log("ABI Loaded:", STAKING_CONTRACT_ABI);
-
 const stakingContract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS);
-
 console.log("Contract methods:", stakingContract.methods);
+
 
 app.get('/isMember/:address', async (req, res) => {
     try {
@@ -292,9 +330,7 @@ app.post('/addMember', (req, res) => {
     if (!req.body || typeof req.body.address !== 'string') {
         return res.status(400).json({ error: 'Address is required in the request body and must be a string.' });
     }
-
     const { address } = req.body;
-
     const command = `npx hardhat assignMember --network alfajores --address "${address}"`;
     exec(command, { cwd: '../hardhat' }, (error, stdout, stderr) => {
         if (error) {
@@ -336,10 +372,63 @@ app.post('/submitIdea', async (req, res) => {
         res.status(500).send(error.toString());
     }
 });
-function sendTransaction(methodName, args, fromAddress) {
-    console.log(`Sending transaction: ${methodName} with args: ${args} from: ${fromAddress}`);
-    return Promise.resolve({ methodName, args, from: fromAddress, txHash: 'mockTxHash' });
-}
+
+
+// creating room and sending transaction to the blockchain 
+
+app.post('/createRoom', async (req, res) => {
+    const { address, roomName } = req.body;
+
+    if (!address || typeof address !== 'string') {
+        return res.status(400).json({ error: 'Address is required and must be a string.' });
+    }
+
+    if (!roomName || typeof roomName !== 'string') {
+        return res.status(400).json({ error: 'Room name is required and must be a string.' });
+    }
+
+    try {
+        const isMember = await stakingContract.methods.isMember(address).call();
+        if (!isMember) {
+            return res.status(403).json({ error: 'Address is not a member.' });
+        }
+
+        // Retrieve the private key from an environment variable or secure storage
+        const privateKey = "1a7950267c5d0901da13a235f96c415299526861feab42ef1086776e5592fba8"; // Replace with your secure key retrieval method
+        if (!privateKey) {
+            throw new Error('Private key not found. Make sure to set it in your environment variables.');
+        }
+
+        // Send transaction to create a room
+        const tx = await sendTransaction2('createRoom', [roomName], address, privateKey);
+
+        // Manually convert all properties of tx to strings if they are BigInt
+        const serializedTx = {};
+        for (const property in tx) {
+            if (tx.hasOwnProperty(property)) {
+                serializedTx[property] = typeof tx[property] === 'bigint' ? tx[property].toString() : tx[property];
+            }
+        }
+
+        res.status(200).json({ message: 'Room created successfully', transaction: serializedTx });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// to list the rooms 
+
+app.get('/listRooms', async (req, res) => {
+    try {
+        const allRooms = await stakingContract.methods.getRooms().call();
+        res.status(200).json({ rooms: allRooms });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 
 
