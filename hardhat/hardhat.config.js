@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("./scripts/addmember");
-
+require("./scripts/registerUser");
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: "0.8.20",

@@ -2,7 +2,7 @@
 const hre = require("hardhat");
 
 async function main() {
-    const StakingContract = await hre.ethers.getContractFactory("StakingUpdated");
+    const StakingContract = await hre.ethers.getContractFactory("UserRegistery");
     const stakingContract = await StakingContract.deploy();
 
     await stakingContract.deployed();

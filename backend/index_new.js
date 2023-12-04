@@ -2,6 +2,8 @@ import express from 'express';
 import Web3 from 'web3';
 import cors from 'cors'; // Import cors
 import { exec } from 'child_process';
+import dotenv from 'dotenv';
+dotenv.config();
 const app = express();
 // Enable CORS for all origins
 app.use(cors());
@@ -394,7 +396,7 @@ app.post('/createRoom', async (req, res) => {
         }
 
         // Retrieve the private key from an environment variable or secure storage
-        const privateKey = "1a7950267c5d0901da13a235f96c415299526861feab42ef1086776e5592fba8"; // Replace with your secure key retrieval method
+        const privateKey = process.env.PRIVATE_KEY; // Replace with your secure key retrieval method
         if (!privateKey) {
             throw new Error('Private key not found. Make sure to set it in your environment variables.');
         }

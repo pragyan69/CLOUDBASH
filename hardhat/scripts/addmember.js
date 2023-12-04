@@ -247,6 +247,7 @@ task("assignMember", "Adds an address as a member")
               "type": "function"
             }
           ];
+          
 
         const provider = new hre.ethers.providers.JsonRpcProvider(hre.network.config.url);
         const signer = new hre.ethers.Wallet(process.env.PRIVATE_KEY, provider);
