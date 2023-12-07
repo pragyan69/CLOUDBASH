@@ -2,7 +2,7 @@
 task("assignMember", "Adds an address as a member")
     .addParam("address", "The address to be added as a member")
     .setAction(async ({ address }, hre) => {
-        const contractAddress = '0x2e2A769f20133D402192282d8Baa44545A7BD7e0'; 
+        const contractAddress = '0xC273B1bF866c227798aD8d48bDbe9041C991b4C6'; 
         const contractABI = [
             {
               "inputs": [],
