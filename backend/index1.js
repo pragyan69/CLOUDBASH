@@ -462,38 +462,40 @@ const contract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_AD
 
 // functions
 async function sendTransaction2(methodName, args, fromAddress, privateKey) {
-    // Make sure the contract instance is defined
-    if (!contract || !contract.methods[methodName]) {
-        throw new Error('Contract is not defined or methodName is incorrect.');
-    }
+  // Estimate gas price and limit
+  const gasPrice = await web3.eth.getGasPrice();
+  const gasLimit = await contract.methods[methodName](...args).estimateGas({ from: fromAddress });
 
-    // Estimate gas price and limit
-    const gasPrice = await web3.eth.getGasPrice();
-    const gasLimit = await contract.methods[methodName](...args).estimateGas({ from: fromAddress });
+  // Get the nonce for the given address
+  const nonce = await web3.eth.getTransactionCount(fromAddress, 'pending');
+  console.log(`Nonce for address ${fromAddress}: ${nonce}`);
 
-    // Transaction object
-    const txObject = {
-        from: fromAddress,
-        to: contract.options.address, // Make sure contract.options and contract.options.address are available
-        data: contract.methods[methodName](...args).encodeABI(),
-        gas: gasLimit,
-        gasPrice: gasPrice
-    };
-    // debugging
-    console.log('Transaction object:', txObject);
-    if (!privateKey) {
-        throw new Error('Private key is undefined or not provided.');
-    }
-    console.log('Private Key:', privateKey); 
+  // Transaction object
+  const txObject = {
+      nonce: web3.utils.toHex(nonce),
+      gasLimit: web3.utils.toHex(gasLimit),
+      gasPrice: web3.utils.toHex(gasPrice),
+      to: contractAddress,
+      data: contract.methods[methodName](...args).encodeABI(),
+      // value: '0x0', // Include this if the method sends value
+  };
 
+  console.log('Transaction object:', txObject);
 
-    // Sign the transaction with the provided private key
-    const signedTx = await web3.eth.accounts.signTransaction(txObject, privateKey);
+  // Sign the transaction with the provided private key
+  const signedTx = await web3.eth.accounts.signTransaction(txObject, privateKey);
 
-    // Send the signed transaction
-    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-    return receipt;
+  // Send the signed transaction
+  try {
+      const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+      console.log('Transaction receipt:', receipt);
+      return receipt;
+  } catch (error) {
+      console.error('Error sending transaction:', error);
+      throw error; // Rethrow the error for further handling if necessary
+  }
 }
+
 
 // logging out the importat data 
 console.log("ABI Loaded:", STAKING_CONTRACT_ABI);
@@ -584,6 +586,7 @@ app.post('/submitIdea', async (req, res) => {
 
 app.post('/createRoom', async (req, res) => {
   const { address, roomName, description, memberLimit, validityInDays } = req.body;
+
   // Validate inputs
   if (!address || typeof address !== 'string') {
       return res.status(400).json({ error: 'Address is required and must be a string.' });
@@ -602,12 +605,13 @@ app.post('/createRoom', async (req, res) => {
   }
 
   try {
-      const isMember = await stakingContract.methods.isMember(address).call();
+      // Check if the address is a member
+      const isMember = await contract.methods.isMember(address).call();
       if (!isMember) {
           return res.status(403).json({ error: 'Address is not a member.' });
       }
 
-      // Retrieve the private key from an environment variable or secure storage
+      // Retrieve the private key for sending the transaction
       const privateKey = process.env.PRIVATE_KEY; // Replace with your secure key retrieval method
       if (!privateKey) {
           throw new Error('Private key not found. Make sure to set it in your environment variables.');
@@ -621,15 +625,8 @@ app.post('/createRoom', async (req, res) => {
           privateKey
       );
 
-      // Serialize transaction properties
-      const serializedTx = {};
-      for (const property in tx) {
-          if (tx.hasOwnProperty(property)) {
-              serializedTx[property] = typeof tx[property] === 'bigint' ? tx[property].toString() : tx[property];
-          }
-      }
-
-      res.status(200).json({ message: 'Room created successfully', transaction: serializedTx });
+      // Assuming sendTransaction returns the transaction hash
+      res.status(200).json({ message: 'Room created successfully', transactionHash: tx });
   } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ error: error.message });
@@ -760,6 +757,42 @@ app.get('/getRoomFeatures', async (req, res) => {
       const features = await contract.methods.getRoomFeatures(roomId).call();
 
       res.status(200).json({ roomId: roomId, features: features });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// request to remove the member from the group 
+app.post('/revokeMember', async (req, res) => {
+  const { ownerAddress, memberAddress } = req.body;
+  if (!isValidAddress(ownerAddress) || !isValidAddress(memberAddress)) {
+      return res.status(400).json({ error: 'Invalid Ethereum addresses.' });
+  }
+  try {
+      const privateKey = process.env.OWNER_PRIVATE_KEY; 
+      if (!privateKey) {
+          throw new Error('Private key not found. Make sure to set it in your environment variables.');
+      }
+      const txHash = await sendTransaction2(
+          'revokeMember',
+          [memberAddress],
+          ownerAddress,
+          privateKey
+      );
+      res.status(200).json({ message: 'Member revoked successfully', transactionHash: txHash });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// to get all the members in the network 
+app.get('/getAllMembers', async (req, res) => {
+  try {
+      const members = await stakingContract.methods.getAllMembers().call();
+
+      res.status(200).json({ members });
   } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ error: error.message });
