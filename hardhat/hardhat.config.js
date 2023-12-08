@@ -3,7 +3,7 @@ require("dotenv").config();
 require("./scripts/addmember");
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-    solidity: "0.8.20",
+    solidity: "0.8.16",
     networks: {
         alfajores: {
             url: "https://alfajores-forno.celo-testnet.org",

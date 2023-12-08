@@ -1,11 +1,10 @@
 import express from 'express';
 import Web3 from 'web3';
-import cors from 'cors'; // Import cors
+import cors from 'cors'; 
 import { exec } from 'child_process';
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
-// Enable CORS for all origins
 app.use(cors());
 app.use(express.json());
 const port = 3001;
@@ -303,7 +302,7 @@ console.log("ABI Loaded:", STAKING_CONTRACT_ABI);
 const stakingContract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS);
 console.log("Contract methods:", stakingContract.methods);
 
-
+// this will check if the address is member or not
 app.get('/isMember/:address', async (req, res) => {
     try {
         console.log("Checking membership for address:", req.params.address);
@@ -316,6 +315,7 @@ app.get('/isMember/:address', async (req, res) => {
     }
 });
 
+// this will check how much token, currency the member is staking or not 
 app.get('/getStake/:address', async (req, res) => {
     try {
         // Accessing the stakes mapping correctly
@@ -327,6 +327,7 @@ app.get('/getStake/:address', async (req, res) => {
     }
 });
 
+// this function will add member 
 app.post('/addMember', (req, res) => {
     // Ensuring that address is treated as a string
     if (!req.body || typeof req.body.address !== 'string') {
@@ -347,6 +348,7 @@ app.post('/addMember', (req, res) => {
     });
 });
 
+// this function will submit idea 
 app.post('/submitIdea', async (req, res) => {
     const { address, idea } = req.body;
 
@@ -420,8 +422,9 @@ app.post('/createRoom', async (req, res) => {
 });
 
 
-// to list the rooms 
 
+
+// to list the rooms 
 app.get('/listRooms', async (req, res) => {
     try {
         const allRooms = await stakingContract.methods.getRooms().call();
