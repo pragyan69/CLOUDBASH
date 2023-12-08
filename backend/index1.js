@@ -642,8 +642,8 @@ app.get('/getRooms', async (req, res) => {
       const formattedRooms = rooms.map(room => ({
           name: room.name,
           description: room.description,
-          memberLimit: room.memberLimit,
-          validity: new Date(room.validity * 1000).toISOString() // Convert timestamp to ISO string
+          memberLimit: room.memberLimit.toString(), // Convert to string if it's a BigInt
+          validity: new Date(parseInt(room.validity) * 1000).toISOString() // Convert to number then to ISO string
       }));
 
       res.status(200).json({ rooms: formattedRooms });
@@ -652,6 +652,8 @@ app.get('/getRooms', async (req, res) => {
       res.status(500).json({ error: error.message });
   }
 });
+
+
 
 
 // room Count , based on the roomCount variable 
