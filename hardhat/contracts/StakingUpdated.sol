@@ -113,28 +113,17 @@ contract StakingUpdated {
 
 
 // function to create room
-    function createRoom(string memory name, string memory description, uint256 memberLimit, uint256 validityInDays, address creator) public {
-        require(isMember[creator], "Creator must be a member to create rooms");
+  function createRoom(string memory name, string memory description, uint256 memberLimit, uint256 validityInDays) public {
+        require(isMember[msg.sender], "Only members can create rooms");
         require(memberLimit > 0, "Member limit must be positive");
         require(validityInDays > 0, "Validity must be positive");
 
-        // Verify that the creator is in the memberList
-        bool isCreatorAMember = false;
-        for (uint256 i = 0; i < memberList.length; i++) {
-            if (memberList[i] == creator) {
-                isCreatorAMember = true;
-                break;
-            }
-        }
-        require(isCreatorAMember, "Creator is not part of the member list");
-
-        // Proceed to create the room
         Room storage room = rooms[roomCount++];
         room.name = name;
         room.description = description;
         room.memberLimit = memberLimit;
         room.validity = block.timestamp + (validityInDays * 1 days);
-        room.members.push(creator);
+        room.members.push(msg.sender);
     }
 
 // this function , will return the room name , correspond to the owner of the room

@@ -3,12 +3,13 @@ import Web3 from 'web3';
 import cors from 'cors'; 
 import { exec } from 'child_process';
 import dotenv from 'dotenv';
+import { ethers } from 'ethers';
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 const port = 3001;
-const STAKING_CONTRACT_ADDRESS = "0xc35cdae1Dfe0Dda91f32572A89c153d804D1c6F6";
+const STAKING_CONTRACT_ADDRESS = "0xE2E90CE7E742AaE4D32A0A66381Bb1b9Db7277f4";
 const web3 = new Web3('https://alfajores-forno.celo-testnet.org');
 const STAKING_CONTRACT_ABI = [
   {
@@ -466,18 +467,17 @@ async function sendTransaction2(methodName, args, fromAddress, privateKey) {
   const gasPrice = await web3.eth.getGasPrice();
   const gasLimit = await contract.methods[methodName](...args).estimateGas({ from: fromAddress });
 
-  // Get the nonce for the given address
-  const nonce = await web3.eth.getTransactionCount(fromAddress, 'pending');
-  console.log(`Nonce for address ${fromAddress}: ${nonce}`);
+  // Get the current nonce for the given address, considering pending transactions
+  const currentNonce = await web3.eth.getTransactionCount(fromAddress, 'pending');
 
   // Transaction object
   const txObject = {
-      nonce: web3.utils.toHex(nonce),
+      nonce: web3.utils.toHex(currentNonce),
       gasLimit: web3.utils.toHex(gasLimit),
       gasPrice: web3.utils.toHex(gasPrice),
-      to: contractAddress,
+      to: STAKING_CONTRACT_ADDRESS, // Ensure this is correctly defined
       data: contract.methods[methodName](...args).encodeABI(),
-      // value: '0x0', // Include this if the method sends value
+       value: '0x0', // Include this if the method sends value
   };
 
   console.log('Transaction object:', txObject);
@@ -487,14 +487,20 @@ async function sendTransaction2(methodName, args, fromAddress, privateKey) {
 
   // Send the signed transaction
   try {
-      const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-      console.log('Transaction receipt:', receipt);
-      return receipt;
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    console.log('Transaction receipt:', receipt);
+    return receipt;
   } catch (error) {
-      console.error('Error sending transaction:', error);
-      throw error; // Rethrow the error for further handling if necessary
+    console.error('Error sending transaction:', error);
+    throw error; // Rethrow the error for further handling if necessary
   }
 }
+
+
+
+
+
+
 
 
 // logging out the importat data 
@@ -620,7 +626,7 @@ app.post('/createRoom', async (req, res) => {
       // Send transaction to create a room
       const tx = await sendTransaction2(
           'createRoom', 
-          [roomName, description, memberLimit, validityInDays], 
+          ["roomName", "description", 0, 1], 
           address, 
           privateKey
       );
@@ -689,7 +695,7 @@ app.get('/getRoomMembers/:roomId', async (req, res) => {
   }
 });
 
-// function to join room 
+// function to join room  we need to add hardhat script 
 app.post('/joinRoom', async (req, res) => {
   const { userAddress, roomId } = req.body;
 
@@ -714,7 +720,7 @@ app.post('/joinRoom', async (req, res) => {
   }
 });
 
-// post request to add the features to the room 
+// post request to add the features to the room we need to addd hardhat script 
 app.post('/addRoomFeature', async (req, res) => {
   const { userAddress, roomId, featureName, featureDescription } = req.body;
   // Validate inputs
@@ -765,7 +771,7 @@ app.get('/getRoomFeatures', async (req, res) => {
   }
 });
 
-// request to remove the member from the group 
+// request to remove the member from the group we need to add hardhat script
 app.post('/revokeMember', async (req, res) => {
   const { ownerAddress, memberAddress } = req.body;
   if (!isValidAddress(ownerAddress) || !isValidAddress(memberAddress)) {
