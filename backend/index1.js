@@ -8,261 +8,459 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const port = 3001;
-const STAKING_CONTRACT_ADDRESS = "0xC273B1bF866c227798aD8d48bDbe9041C991b4C6";
+const STAKING_CONTRACT_ADDRESS = "0xc35cdae1Dfe0Dda91f32572A89c153d804D1c6F6";
 const web3 = new Web3('https://alfajores-forno.celo-testnet.org');
 const STAKING_CONTRACT_ABI = [
-    {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "member",
-          "type": "address"
-        }
-      ],
-      "name": "assignMember",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "roomName",
-          "type": "string"
-        }
-      ],
-      "name": "createRoom",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getAllMembers",
-      "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getRooms",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "address[]",
-              "name": "members",
-              "type": "address[]"
-            }
-          ],
-          "internalType": "struct StakingUpdated.Room[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "isMember",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "roomId",
-          "type": "uint256"
-        }
-      ],
-      "name": "joinRoom",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "listAllRooms",
-      "outputs": [
-        {
-          "internalType": "string[]",
-          "name": "",
-          "type": "string[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "memberIdeas",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "member",
-          "type": "address"
-        }
-      ],
-      "name": "revokeMember",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "roomCount",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "rooms",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "stake",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "stakes",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "idea",
-          "type": "string"
-        }
-      ],
-      "name": "submitIdea",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ];
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roomId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "featureName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "featureDescription",
+        "type": "string"
+      }
+    ],
+    "name": "addRoomFeature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "member",
+        "type": "address"
+      }
+    ],
+    "name": "assignMember",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "memberLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "validityInDays",
+        "type": "uint256"
+      }
+    ],
+    "name": "createRoom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllMembers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roomId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRoomFeatures",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct StakingUpdated.Feature[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roomId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRoomIdeas",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roomId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRoomMembers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRooms",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "memberLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "validity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "members",
+            "type": "address[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StakingUpdated.Feature[]",
+            "name": "features",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct StakingUpdated.Room[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "isMember",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roomId",
+        "type": "uint256"
+      }
+    ],
+    "name": "joinRoom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "listAllRooms",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "memberLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "validity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "members",
+            "type": "address[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct StakingUpdated.Feature[]",
+            "name": "features",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct StakingUpdated.Room[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "memberIdeas",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "member",
+        "type": "address"
+      }
+    ],
+    "name": "revokeMember",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "roomCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rooms",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "memberLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "validity",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stake",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "stakes",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roomId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "idea",
+        "type": "string"
+      }
+    ],
+    "name": "submitIdea",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+] 
+const contract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS)
 
-  const contract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS)
 
-  // functions
-function sendTransaction(methodName, args, fromAddress) {
-    console.log(`Sending transaction: ${methodName} with args: ${args} from: ${fromAddress}`);
-    return Promise.resolve({ methodName, args, from: fromAddress, txHash: 'mockTxHash' });
-}
-
+// functions
 async function sendTransaction2(methodName, args, fromAddress, privateKey) {
     // Make sure the contract instance is defined
     if (!contract || !contract.methods[methodName]) {
@@ -301,6 +499,10 @@ async function sendTransaction2(methodName, args, fromAddress, privateKey) {
 console.log("ABI Loaded:", STAKING_CONTRACT_ABI);
 const stakingContract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS);
 console.log("Contract methods:", stakingContract.methods);
+
+
+// **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** // 
+
 
 // this will check if the address is member or not
 app.get('/isMember/:address', async (req, res) => {
@@ -381,64 +583,190 @@ app.post('/submitIdea', async (req, res) => {
 // creating room and sending transaction to the blockchain 
 
 app.post('/createRoom', async (req, res) => {
-    const { address, roomName } = req.body;
+  const { address, roomName, description, memberLimit, validityInDays } = req.body;
+  // Validate inputs
+  if (!address || typeof address !== 'string') {
+      return res.status(400).json({ error: 'Address is required and must be a string.' });
+  }
+  if (!roomName || typeof roomName !== 'string') {
+      return res.status(400).json({ error: 'Room name is required and must be a string.' });
+  }
+  if (!description || typeof description !== 'string') {
+      return res.status(400).json({ error: 'Description is required and must be a string.' });
+  }
+  if (typeof memberLimit !== 'number' || memberLimit <= 0) {
+      return res.status(400).json({ error: 'Member limit must be a positive number.' });
+  }
+  if (typeof validityInDays !== 'number' || validityInDays <= 0) {
+      return res.status(400).json({ error: 'Validity in days must be a positive number.' });
+  }
 
-    if (!address || typeof address !== 'string') {
-        return res.status(400).json({ error: 'Address is required and must be a string.' });
-    }
+  try {
+      const isMember = await stakingContract.methods.isMember(address).call();
+      if (!isMember) {
+          return res.status(403).json({ error: 'Address is not a member.' });
+      }
 
-    if (!roomName || typeof roomName !== 'string') {
-        return res.status(400).json({ error: 'Room name is required and must be a string.' });
-    }
+      // Retrieve the private key from an environment variable or secure storage
+      const privateKey = process.env.PRIVATE_KEY; // Replace with your secure key retrieval method
+      if (!privateKey) {
+          throw new Error('Private key not found. Make sure to set it in your environment variables.');
+      }
 
-    try {
-        const isMember = await stakingContract.methods.isMember(address).call();
-        if (!isMember) {
-            return res.status(403).json({ error: 'Address is not a member.' });
-        }
+      // Send transaction to create a room
+      const tx = await sendTransaction2(
+          'createRoom', 
+          [roomName, description, memberLimit, validityInDays], 
+          address, 
+          privateKey
+      );
 
-        // Retrieve the private key from an environment variable or secure storage
-        const privateKey = process.env.PRIVATE_KEY; // Replace with your secure key retrieval method
-        if (!privateKey) {
-            throw new Error('Private key not found. Make sure to set it in your environment variables.');
-        }
+      // Serialize transaction properties
+      const serializedTx = {};
+      for (const property in tx) {
+          if (tx.hasOwnProperty(property)) {
+              serializedTx[property] = typeof tx[property] === 'bigint' ? tx[property].toString() : tx[property];
+          }
+      }
 
-        // Send transaction to create a room
-        const tx = await sendTransaction2('createRoom', [roomName], address, privateKey);
-
-        // Manually convert all properties of tx to strings if they are BigInt
-        const serializedTx = {};
-        for (const property in tx) {
-            if (tx.hasOwnProperty(property)) {
-                serializedTx[property] = typeof tx[property] === 'bigint' ? tx[property].toString() : tx[property];
-            }
-        }
-
-        res.status(200).json({ message: 'Room created successfully', transaction: serializedTx });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
+      res.status(200).json({ message: 'Room created successfully', transaction: serializedTx });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
 });
-
-
-
 
 // to list the rooms 
-app.get('/listRooms', async (req, res) => {
-    try {
-        const allRooms = await stakingContract.methods.getRooms().call();
-        res.status(200).json({ rooms: allRooms });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
+app.get('/getRooms', async (req, res) => {
+  try {
+      const rooms = await contract.methods.getRooms().call();
+
+      // Format the rooms data
+      const formattedRooms = rooms.map(room => ({
+          name: room.name,
+          description: room.description,
+          memberLimit: room.memberLimit,
+          validity: new Date(room.validity * 1000).toISOString() // Convert timestamp to ISO string
+      }));
+
+      res.status(200).json({ rooms: formattedRooms });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
 });
 
 
+// room Count , based on the roomCount variable 
+
+app.get('/getRoomCount', async (req, res) => {
+  try {
+      const roomCount = await contract.methods.roomCount().call();
+
+      res.status(200).json({ roomCount: roomCount });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
 
 
+// to return all the members of a particular room 
+app.get('/getRoomMembers/:roomId', async (req, res) => {
+  const roomId = req.params.roomId;
 
+  // Validate that roomId is a number
+  if (isNaN(parseInt(roomId))) {
+      return res.status(400).json({ error: 'Room ID must be a valid number.' });
+  }
+
+  try {
+      const members = await contract.methods.getRoomMembers(roomId).call();
+
+      res.status(200).json({ roomId: roomId, members: members });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// function to join room 
+app.post('/joinRoom', async (req, res) => {
+  const { userAddress, roomId } = req.body;
+
+  // Validate inputs
+  if (isNaN(parseInt(roomId))) {
+      return res.status(400).json({ error: 'Room ID must be a valid number.' });
+  }
+  try {
+      const isMember = await contract.methods.isMember(userAddress).call();
+      if (!isMember) {
+          return res.status(403).json({ error: 'User is not a member of the network.' });
+      }
+      const privateKey = process.env.PRIVATE_KEY; 
+      if (!privateKey) {
+          throw new Error('Private key not found. Make sure to set it in your environment variables.');
+      }
+      const tx = await sendTransaction2('joinRoom', [roomId], userAddress, privateKey);
+      res.status(200).json({ message: 'Joined room successfully', transaction: tx });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// post request to add the features to the room 
+app.post('/addRoomFeature', async (req, res) => {
+  const { userAddress, roomId, featureName, featureDescription } = req.body;
+  // Validate inputs
+  if (isNaN(parseInt(roomId))) {
+      return res.status(400).json({ error: 'Room ID must be a valid number.' });
+  }
+  try {
+      // Check if the user is a member of the room
+      const room = await contract.methods.rooms(roomId).call();
+      const isMemberOfRoom = room.members.includes(userAddress);
+      if (!isMemberOfRoom) {
+          return res.status(403).json({ error: 'User is not a member of the room.' });
+      }
+      // Retrieve the private key for sending the transaction
+      const privateKey = process.env.PRIVATE_KEY; // Replace with your secure key retrieval method
+      if (!privateKey) {
+          throw new Error('Private key not found. Make sure to set it in your environment variables.');
+      }
+      // Send transaction to add the room feature
+      const txHash = await sendTransaction2(
+          'addRoomFeature',
+          [roomId, featureName, featureDescription],
+          userAddress,
+          privateKey
+      );
+      res.status(200).json({ message: 'Room feature added successfully', transactionHash: txHash });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// this function will return the room features 
+app.get('/getRoomFeatures', async (req, res) => {
+  const roomId = req.query.roomId;
+  // Validate that roomId is a number
+  if (isNaN(parseInt(roomId))) {
+      return res.status(400).json({ error: 'Room ID must be a valid number.' });
+  }
+
+  try {
+      const features = await contract.methods.getRoomFeatures(roomId).call();
+
+      res.status(200).json({ roomId: roomId, features: features });
+  } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// the main exit function 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
