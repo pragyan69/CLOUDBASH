@@ -9,455 +9,465 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const port = 3001;
-const STAKING_CONTRACT_ADDRESS = "0xE2E90CE7E742AaE4D32A0A66381Bb1b9Db7277f4";
+const STAKING_CONTRACT_ADDRESS = "0x5bc4701B7A67f19E47698C804fA9474d18B7B0e5";
 const web3 = new Web3('https://alfajores-forno.celo-testnet.org');
 const STAKING_CONTRACT_ABI = [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "roomId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "featureName",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "featureDescription",
-        "type": "string"
-      }
-    ],
-    "name": "addRoomFeature",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "member",
-        "type": "address"
-      }
-    ],
-    "name": "assignMember",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "memberLimit",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "validityInDays",
-        "type": "uint256"
-      }
-    ],
-    "name": "createRoom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getAllMembers",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "roomId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getRoomFeatures",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          }
-        ],
-        "internalType": "struct StakingUpdated.Feature[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "roomId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getRoomIdeas",
-    "outputs": [
-      {
-        "internalType": "string[]",
-        "name": "",
-        "type": "string[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "roomId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getRoomMembers",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getRooms",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "memberLimit",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "validity",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address[]",
-            "name": "members",
-            "type": "address[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "description",
-                "type": "string"
-              }
-            ],
-            "internalType": "struct StakingUpdated.Feature[]",
-            "name": "features",
-            "type": "tuple[]"
-          }
-        ],
-        "internalType": "struct StakingUpdated.Room[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "isMember",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "roomId",
-        "type": "uint256"
-      }
-    ],
-    "name": "joinRoom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "listAllRooms",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "memberLimit",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "validity",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address[]",
-            "name": "members",
-            "type": "address[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "description",
-                "type": "string"
-              }
-            ],
-            "internalType": "struct StakingUpdated.Feature[]",
-            "name": "features",
-            "type": "tuple[]"
-          }
-        ],
-        "internalType": "struct StakingUpdated.Room[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "memberIdeas",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "member",
-        "type": "address"
-      }
-    ],
-    "name": "revokeMember",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "roomCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "rooms",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "memberLimit",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "validity",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "stake",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "stakes",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "roomId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "idea",
-        "type": "string"
-      }
-    ],
-    "name": "submitIdea",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-] 
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "roomId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "featureName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "featureDescription",
+				"type": "string"
+			}
+		],
+		"name": "addRoomFeature",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "assignMember",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "memberLimit",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "validityInDays",
+				"type": "uint256"
+			}
+		],
+		"name": "createRoom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "roomId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "joinRoom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "revokeMember",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "stake",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "roomId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "idea",
+				"type": "string"
+			}
+		],
+		"name": "submitIdea",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllMembers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "roomId",
+				"type": "uint256"
+			}
+		],
+		"name": "getRoomFeatures",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					}
+				],
+				"internalType": "struct StakingUpdated.Feature[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "roomId",
+				"type": "uint256"
+			}
+		],
+		"name": "getRoomIdeas",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "roomId",
+				"type": "uint256"
+			}
+		],
+		"name": "getRoomMembers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getRooms",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "memberLimit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "validity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address[]",
+						"name": "members",
+						"type": "address[]"
+					},
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "name",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							}
+						],
+						"internalType": "struct StakingUpdated.Feature[]",
+						"name": "features",
+						"type": "tuple[]"
+					}
+				],
+				"internalType": "struct StakingUpdated.Room[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isMember",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "listAllRooms",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "memberLimit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "validity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address[]",
+						"name": "members",
+						"type": "address[]"
+					},
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "name",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							}
+						],
+						"internalType": "struct StakingUpdated.Feature[]",
+						"name": "features",
+						"type": "tuple[]"
+					}
+				],
+				"internalType": "struct StakingUpdated.Room[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "memberIdeas",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "roomCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "rooms",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "memberLimit",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "validity",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "stakes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
 const contract = new web3.eth.Contract(STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS)
 
 
@@ -590,54 +600,29 @@ app.post('/submitIdea', async (req, res) => {
 
 // creating room and sending transaction to the blockchain 
 
-app.post('/createRoom', async (req, res) => {
-  const { address, roomName, description, memberLimit, validityInDays } = req.body;
+app.post('/createRoom', (req, res) => {
+  const { creator, name, description, memberlimit, validityindays } = req.body;
 
-  // Validate inputs
-  if (!address || typeof address !== 'string') {
-      return res.status(400).json({ error: 'Address is required and must be a string.' });
-  }
-  if (!roomName || typeof roomName !== 'string') {
-      return res.status(400).json({ error: 'Room name is required and must be a string.' });
-  }
-  if (!description || typeof description !== 'string') {
-      return res.status(400).json({ error: 'Description is required and must be a string.' });
-  }
-  if (typeof memberLimit !== 'number' || memberLimit <= 0) {
-      return res.status(400).json({ error: 'Member limit must be a positive number.' });
-  }
-  if (typeof validityInDays !== 'number' || validityInDays <= 0) {
-      return res.status(400).json({ error: 'Validity in days must be a positive number.' });
+  // Validate the input
+  if (!creator || !name || !description || !memberlimit || !validityindays) {
+      return res.status(400).json({ error: 'All fields are required.' });
   }
 
-  try {
-      // Check if the address is a member
-      const isMember = await contract.methods.isMember(address).call();
-      if (!isMember) {
-          return res.status(403).json({ error: 'Address is not a member.' });
+  const command = `npx hardhat createRoom --network alfajores --creator "${creator}" --name "${name}" --description "${description}" --memberlimit ${memberlimit} --validityindays ${validityindays}`;
+  
+  exec(command, { cwd: '../hardhat' }, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Error: ${error}`);
+          return res.status(500).json({ error: error.message });
       }
-
-      // Retrieve the private key for sending the transaction
-      const privateKey = process.env.PRIVATE_KEY; // Replace with your secure key retrieval method
-      if (!privateKey) {
-          throw new Error('Private key not found. Make sure to set it in your environment variables.');
+      if (stderr) {
+          console.error(`Stderr: ${stderr}`);
+          return res.status(500).json({ error: stderr });
       }
-
-      // Send transaction to create a room
-      const tx = await sendTransaction2(
-          'createRoom', 
-          ["roomName", "description", 0, 1], 
-          address, 
-          privateKey
-      );
-
-      // Assuming sendTransaction returns the transaction hash
-      res.status(200).json({ message: 'Room created successfully', transactionHash: tx });
-  } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ error: error.message });
-  }
+      res.json({ message: `Room '${name}' created successfully`, output: stdout });
+  });
 });
+
 
 // to list the rooms 
 app.get('/getRooms', async (req, res) => {
@@ -696,29 +681,29 @@ app.get('/getRoomMembers/:roomId', async (req, res) => {
 });
 
 // function to join room  we need to add hardhat script 
-app.post('/joinRoom', async (req, res) => {
-  const { userAddress, roomId } = req.body;
+app.post('/joinRoom', (req, res) => {
+  const { roomId, member } = req.body;
 
-  // Validate inputs
-  if (isNaN(parseInt(roomId))) {
-      return res.status(400).json({ error: 'Room ID must be a valid number.' });
+  // Validate the input
+  if (!roomId || !member) {
+      return res.status(400).json({ error: 'Room ID and member address are required.' });
   }
-  try {
-      const isMember = await contract.methods.isMember(userAddress).call();
-      if (!isMember) {
-          return res.status(403).json({ error: 'User is not a member of the network.' });
+
+  const command = `npx hardhat joinRoom --address "${member}" --room-id ${roomId} --network alfajores`;
+  
+  exec(command, { cwd: '../hardhat' }, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Error: ${error}`);
+          return res.status(500).json({ error: error.message });
       }
-      const privateKey = process.env.PRIVATE_KEY; 
-      if (!privateKey) {
-          throw new Error('Private key not found. Make sure to set it in your environment variables.');
+      if (stderr) {
+          console.error(`Stderr: ${stderr}`);
+          return res.status(500).json({ error: stderr });
       }
-      const tx = await sendTransaction2('joinRoom', [roomId], userAddress, privateKey);
-      res.status(200).json({ message: 'Joined room successfully', transaction: tx });
-  } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ error: error.message });
-  }
+      res.json({ message: `Member ${member} joined room ${roomId} successfully`, output: stdout });
+  });
 });
+
 
 // post request to add the features to the room we need to addd hardhat script 
 app.post('/addRoomFeature', async (req, res) => {
